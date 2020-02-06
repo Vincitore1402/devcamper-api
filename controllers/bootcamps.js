@@ -1,4 +1,5 @@
 const ErrorResponse = require('../utils/errorResponse');
+const asyncHandler = require('../middleware/async');
 const Bootcamp = require('../models/Bootcamp');
 
 /**
@@ -6,118 +7,98 @@ const Bootcamp = require('../models/Bootcamp');
  * @route GET api/v1/bootcamps
  * @access Public
  */
-const getBootcamps = async (req, res, next) => {
-  try {
-    const bootcamps = await Bootcamp.find();
+const getBootcamps = asyncHandler(async (req, res, next) => {
+  const bootcamps = await Bootcamp.find();
 
-    res.status(200)
-      .json({
-        success: true,
-        count: bootcamps.length,
-        data: bootcamps
-      })
-  } catch (e) {
-    next(e)
-  }
-};
+  res.status(200)
+    .json({
+      success: true,
+      count: bootcamps.length,
+      data: bootcamps
+    })
+});
 
 /**
  * @desc Get single bootcamps
  * @route GET api/v1/bootcamps/:id
  * @access Public
  */
-const getBootCamp = async (req, res, next) => {
-  try {
-    const bootcamp = await Bootcamp.findById(req.params.id);
+const getBootCamp = asyncHandler(async (req, res, next) => {
+  const bootcamp = await Bootcamp.findById(req.params.id);
 
-    if (!bootcamp) {
-      return next(
-        new ErrorResponse(`Bootcamp not found with id of ${req.params.id}`, 404)
-      );
-    }
-
-    res.status(200)
-      .json({
-        success: true,
-        data: bootcamp
-      })
-  } catch (e) {
-    next(e);
+  if (!bootcamp) {
+    return next(
+      new ErrorResponse(`Bootcamp not found with id of ${req.params.id}`, 404)
+    );
   }
-};
+
+  res.status(200)
+    .json({
+      success: true,
+      data: bootcamp
+    })
+});
 
 /**
  * @desc Create new bootcamps
  * @route POST api/v1/bootcamps
  * @access Private
  */
-const createBootcamp = async (req, res, next) => {
-  try {
-    const bootcamp = await Bootcamp.create(req.body);
+const createBootcamp = asyncHandler(async (req, res, next) => {
+  const bootcamp = await Bootcamp.create(req.body);
 
-    res.status(201)
-      .json({
-        success: true,
-        data: bootcamp
-      });
-  } catch (e) {
-    next(e);
-  }
-};
+  res.status(201)
+    .json({
+      success: true,
+      data: bootcamp
+    });
+});
 
 /**
  * @desc Update bootcamps
  * @route PUT api/v1/bootcamps/:id
  * @access Private
  */
-const updateBootcamp = async (req, res, next) => {
-  try {
-    const bootcamp = await Bootcamp.findByIdAndUpdate(
-      req.params.id,
-      req.body,
-      { new: true, runValidators: true }
+const updateBootcamp = asyncHandler(async (req, res, next) => {
+  const bootcamp = await Bootcamp.findByIdAndUpdate(
+    req.params.id,
+    req.body,
+    { new: true, runValidators: true }
+  );
+
+  if (!bootcamp) {
+    return next(
+      new ErrorResponse(`Bootcamp not found with id of ${req.params.id}`, 404)
     );
-
-    if (!bootcamp) {
-      return next(
-        new ErrorResponse(`Bootcamp not found with id of ${req.params.id}`, 404)
-      );
-    }
-
-    res.status(200)
-      .json({
-        success: true,
-        data: bootcamp
-      });
-  } catch (e) {
-    next(e);
   }
-};
+
+  res.status(200)
+    .json({
+      success: true,
+      data: bootcamp
+    });
+});
 
 /**
  * @desc Delete bootcamps
  * @route DELETE api/v1/bootcamps/:id
  * @access Private
  */
-const deleteBootcamp = async (req, res, next) => {
-  try {
-    const bootcamp = await Bootcamp.findByIdAndDelete(req.params.id);
+const deleteBootcamp = asyncHandler(async (req, res, next) => {
+  const bootcamp = await Bootcamp.findByIdAndDelete(req.params.id);
 
-    if (!bootcamp) {
-      return next(
-        new ErrorResponse(`Bootcamp not found with id of ${req.params.id}`, 404)
-      );
-    }
-
-    res.status(200)
-      .json({
-        success: true,
-        data: {}
-      });
-  } catch (e) {
-    next(e);
+  if (!bootcamp) {
+    return next(
+      new ErrorResponse(`Bootcamp not found with id of ${req.params.id}`, 404)
+    );
   }
-};
+
+  res.status(200)
+    .json({
+      success: true,
+      data: {}
+    });
+});
 
 module.exports = {
   getBootcamps,
