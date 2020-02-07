@@ -1,11 +1,8 @@
+const { pipe, map, values, get } = require('lodash/fp');
 const ErrorResponse = require('../utils/errorResponse');
 
 const errorHandler = (err, req, res, next) => {
   let error = { ...err };
-
-  error.message = err.message;
-
-  console.log({ error });
 
   if (err.name === 'CastError') {
     const message = `Resource not found with id of ${err.value}`;
@@ -18,8 +15,12 @@ const errorHandler = (err, req, res, next) => {
   }
 
   if (err.name === 'ValidationError') {
-    const message = Object.values(err.errors)
-      .map(item => item.message);
+    const message = pipe(
+      get('errors'),
+      values,
+      map('message')
+    )(err);
+
     error = new ErrorResponse(message, 404);
   }
 
