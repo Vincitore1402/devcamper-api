@@ -1,3 +1,4 @@
+const { get } = require('lodash/fp');
 const ErrorResponse = require('../utils/errorResponse');
 const asyncHandler = require('../middleware/async');
 const Bootcamp = require('../models/Bootcamp');
@@ -24,11 +25,13 @@ const getBootcamps = asyncHandler(async (req, res, next) => {
  * @access Public
  */
 const getBootCamp = asyncHandler(async (req, res, next) => {
-  const bootcamp = await Bootcamp.findById(req.params.id);
+  const bootcampId = get('params.id', req);
+
+  const bootcamp = await Bootcamp.findById(bootcampId);
 
   if (!bootcamp) {
     return next(
-      new ErrorResponse(`Bootcamp not found with id of ${req.params.id}`, 404)
+      new ErrorResponse(`Bootcamp not found with id of ${bootcampId}`, 404)
     );
   }
 
@@ -60,15 +63,17 @@ const createBootcamp = asyncHandler(async (req, res, next) => {
  * @access Private
  */
 const updateBootcamp = asyncHandler(async (req, res, next) => {
+  const bootcampId = get('params.id', req);
+
   const bootcamp = await Bootcamp.findByIdAndUpdate(
-    req.params.id,
+    bootcampId,
     req.body,
     { new: true, runValidators: true }
   );
 
   if (!bootcamp) {
     return next(
-      new ErrorResponse(`Bootcamp not found with id of ${req.params.id}`, 404)
+      new ErrorResponse(`Bootcamp not found with id of ${bootcampId}`, 404)
     );
   }
 
@@ -85,11 +90,13 @@ const updateBootcamp = asyncHandler(async (req, res, next) => {
  * @access Private
  */
 const deleteBootcamp = asyncHandler(async (req, res, next) => {
-  const bootcamp = await Bootcamp.findByIdAndDelete(req.params.id);
+  const bootcampId = get('params.id', req);
+
+  const bootcamp = await Bootcamp.findByIdAndDelete(bootcampId);
 
   if (!bootcamp) {
     return next(
-      new ErrorResponse(`Bootcamp not found with id of ${req.params.id}`, 404)
+      new ErrorResponse(`Bootcamp not found with id of ${bootcampId}`, 404)
     );
   }
 
