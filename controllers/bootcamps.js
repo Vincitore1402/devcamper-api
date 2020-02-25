@@ -1,6 +1,7 @@
-const { get } = require('lodash/fp');
+const { get, pipe, omitAll, defaultTo } = require('lodash/fp');
 const ErrorResponse = require('../utils/errorResponse');
 const asyncHandler = require('../middleware/async');
+const { buildQuery, buildSelectOrSortQuery } = require('../utils/query.utils');
 const geocoder = require('../utils/geocoder');
 const Bootcamp = require('../models/Bootcamp');
 
@@ -10,7 +11,30 @@ const Bootcamp = require('../models/Bootcamp');
  * @access Public
  */
 const getBootcamps = asyncHandler(async (req, res, next) => {
-  const bootcamps = await Bootcamp.find();
+  const removeFields = ['select', 'sort'];
+
+  // Get request query and remove fields with specific purposes
+  const reqQuery = pipe(
+    get('query'),
+    it => ({ ...it }),
+    omitAll(removeFields)
+  )(req);
+
+  const selectQuery = pipe(
+    get('query.select'),
+    buildSelectOrSortQuery
+  )(req);
+
+  const sortQuery = pipe(
+    get('query.sort'),
+    buildSelectOrSortQuery,
+    defaultTo('-createdAt')
+  )(req);
+
+  const bootcamps = await Bootcamp
+    .find({ ...buildQuery(reqQuery) })
+    .select(selectQuery)
+    .sort(sortQuery);
 
   res.status(200)
     .json({
