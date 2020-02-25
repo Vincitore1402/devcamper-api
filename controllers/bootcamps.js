@@ -11,7 +11,7 @@ const Bootcamp = require('../models/Bootcamp');
  * @access Public
  */
 const getBootcamps = asyncHandler(async (req, res, next) => {
-  const removeFields = ['select', 'sort'];
+  const removeFields = ['select', 'sort', 'page', 'limit'];
 
   // Get request query and remove fields with specific purposes
   const reqQuery = pipe(
@@ -31,15 +31,50 @@ const getBootcamps = asyncHandler(async (req, res, next) => {
     defaultTo('-createdAt')
   )(req);
 
+  const page = pipe(
+    get('query.page'),
+    it => parseInt(it, 10),
+    defaultTo(1)
+  )(req);
+
+  const limit = pipe(
+    get('query.limit'),
+    it => parseInt(it, 10),
+    defaultTo(25)
+  )(req);
+
+  const startIndex = (page - 1) * limit;
+  const endIndex = page * limit;
+  const total = await Bootcamp.countDocuments();
+
+  const pagination = {};
+
+  if (endIndex < total) {
+    pagination.next = {
+      page: page + 1,
+      limit
+    }
+  }
+
+  if (startIndex > 0) {
+    pagination.prev = {
+      page: page - 1,
+      limit
+    }
+  }
+
   const bootcamps = await Bootcamp
     .find({ ...buildQuery(reqQuery) })
     .select(selectQuery)
-    .sort(sortQuery);
+    .sort(sortQuery)
+    .skip(startIndex)
+    .limit(limit);
 
   res.status(200)
     .json({
       success: true,
       count: bootcamps.length,
+      pagination,
       data: bootcamps
     });
 });
