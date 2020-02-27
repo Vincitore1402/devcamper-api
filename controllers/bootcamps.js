@@ -53,14 +53,14 @@ const getBootcamps = asyncHandler(async (req, res, next) => {
     pagination.next = {
       page: page + 1,
       limit
-    }
+    };
   }
 
   if (startIndex > 0) {
     pagination.prev = {
       page: page - 1,
       limit
-    }
+    };
   }
 
   const bootcamps = await Bootcamp
@@ -191,7 +191,7 @@ const getBootcampsInRadius = asyncHandler(async (req, res, next) => {
       success: true,
       count: bootcamps.length,
       data: bootcamps
-    })
+    });
 });
 
 module.exports = {
