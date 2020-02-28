@@ -1,8 +1,10 @@
-const { pipe, map, values, get } = require('lodash/fp');
+const { pipe, map, values, get, pick } = require('lodash/fp');
 const ErrorResponse = require('../utils/errorResponse');
 
 const errorHandler = (err, req, res, next) => {
-  let error = { ...err };
+  let error = pick([
+    'name', 'code', 'message', 'statusCode'
+  ], err);
 
   if (err.name === 'CastError') {
     const message = `Resource not found with id of ${err.value}`;
