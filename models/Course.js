@@ -1,3 +1,4 @@
+const { pipe, head, get } = require('lodash/fp');
 const mongoose = require('mongoose');
 
 const CourseSchema = new mongoose.Schema({
@@ -41,6 +42,45 @@ const CourseSchema = new mongoose.Schema({
     ref: 'User',
     required: true
   }
+});
+
+// Static method to get avg of course tuitions
+CourseSchema.statics.getAverageCost = async function(bootcampId) {
+  const aggregationResult = await this.aggregate([
+    {
+      $match: { bootcamp: bootcampId }
+    },
+    {
+      $group: {
+        _id: '$bootcamp',
+        averageCost: { $avg: '$tuition' }
+      }
+    }
+  ]);
+
+  const averageCost = pipe(
+    head,
+    get('averageCost'),
+    cost => Math.ceil(cost / 10) * 10
+  )(aggregationResult);
+
+  try {
+    await this.model('Bootcamp').findByIdAndUpdate(bootcampId, {
+      averageCost
+    });
+  } catch (err) {
+    console.error(err);
+  }
+};
+
+// Call getAverageCost after save
+CourseSchema.post('save', async function() {
+  await this.constructor.getAverageCost(this.bootcamp);
+});
+
+// Call getAverageCost before remove
+CourseSchema.pre('remove', async function() {
+  await this.constructor.getAverageCost(this.bootcamp);
 });
 
 module.exports = mongoose.model('Course', CourseSchema);
