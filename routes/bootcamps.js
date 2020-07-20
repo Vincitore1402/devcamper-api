@@ -9,6 +9,10 @@ const {
   uploadBootcampPhoto
 } = require('../controllers/bootcamps');
 
+const Bootcamp = require('../models/Bootcamp');
+
+const advancedResults = require('../middleware/advanced.results');
+
 const courseRouter = require('./courses');
 
 const router = express.Router();
@@ -22,7 +26,10 @@ router.route('/:id/photo')
   .put(uploadBootcampPhoto);
 
 router.route('/')
-  .get(getBootcamps)
+  .get(
+    advancedResults(Bootcamp, 'courses'),
+    getBootcamps
+  )
   .post(createBootcamp);
 
 router.route('/:id')

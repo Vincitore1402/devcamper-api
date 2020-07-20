@@ -1,8 +1,7 @@
-const { get, pipe, omitAll, defaultTo } = require('lodash/fp');
+const { get } = require('lodash/fp');
 const path = require('path');
 const ErrorResponse = require('../utils/errorResponse');
 const asyncHandler = require('../middleware/async');
-const { buildQuery, buildSelectOrSortQuery } = require('../utils/query.utils');
 const geocoder = require('../utils/geocoder');
 const Bootcamp = require('../models/Bootcamp');
 
@@ -11,74 +10,9 @@ const Bootcamp = require('../models/Bootcamp');
  * @route GET api/v1/bootcamps
  * @access Public
  */
-const getBootcamps = asyncHandler(async (req, res, next) => {
-  const removeFields = ['select', 'sort', 'page', 'limit'];
-
-  // Get request query and remove fields with specific purposes
-  const reqQuery = pipe(
-    get('query'),
-    it => ({ ...it }),
-    omitAll(removeFields)
-  )(req);
-
-  const selectQuery = pipe(
-    get('query.select'),
-    buildSelectOrSortQuery
-  )(req);
-
-  const sortQuery = pipe(
-    get('query.sort'),
-    buildSelectOrSortQuery,
-    defaultTo('-createdAt')
-  )(req);
-
-  const page = pipe(
-    get('query.page'),
-    it => parseInt(it, 10),
-    defaultTo(1)
-  )(req);
-
-  const limit = pipe(
-    get('query.limit'),
-    it => parseInt(it, 10),
-    defaultTo(25)
-  )(req);
-
-  const startIndex = (page - 1) * limit;
-  const endIndex = page * limit;
-  const total = await Bootcamp.countDocuments();
-
-  const pagination = {};
-
-  if (endIndex < total) {
-    pagination.next = {
-      page: page + 1,
-      limit
-    };
-  }
-
-  if (startIndex > 0) {
-    pagination.prev = {
-      page: page - 1,
-      limit
-    };
-  }
-
-  const bootcamps = await Bootcamp
-    .find({ ...buildQuery(reqQuery) })
-    .populate('courses')
-    .select(selectQuery)
-    .sort(sortQuery)
-    .skip(startIndex)
-    .limit(limit);
-
+const getBootcamps = asyncHandler(async (req, res) => {
   res.status(200)
-    .json({
-      success: true,
-      count: bootcamps.length,
-      pagination,
-      data: bootcamps
-    });
+    .json(res.advancedResults);
 });
 
 /**
@@ -109,7 +43,7 @@ const getBootCamp = asyncHandler(async (req, res, next) => {
  * @route POST api/v1/bootcamps
  * @access Private
  */
-const createBootcamp = asyncHandler(async (req, res, next) => {
+const createBootcamp = asyncHandler(async (req, res) => {
   const bootcamp = await Bootcamp.create(req.body);
 
   res.status(201)
@@ -176,7 +110,7 @@ const deleteBootcamp = asyncHandler(async (req, res, next) => {
  * @route GET api/v1/bootcamps/radius/:zipcode/:distance
  * @access Private
  */
-const getBootcampsInRadius = asyncHandler(async (req, res, next) => {
+const getBootcampsInRadius = asyncHandler(async (req, res) => {
   const { zipcode, distance } = req.params;
 
   const [geoData = {}] = await geocoder.geocode(zipcode);

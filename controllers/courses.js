@@ -1,6 +1,8 @@
 const { get } = require('lodash/fp');
+
 const asyncHandler = require('../middleware/async');
 const ErrorResponse = require('../utils/errorResponse');
+
 const Course = require('../models/Course');
 const Bootcamp = require('../models/Bootcamp');
 
@@ -10,24 +12,23 @@ const Bootcamp = require('../models/Bootcamp');
  * @route     GET /api/v1/bootcamps/:bootcampId/courses
  * @access    Public
  */
-const getCourses = asyncHandler(async (req, res, next) => {
+const getCourses = asyncHandler(async (req, res) => {
   const bootcampId = get('params.bootcampId', req);
 
-  const query = bootcampId ? { bootcamp: bootcampId } : {};
+  if (bootcampId) {
+    const courses = await Course
+      .find({ bootcamp: bootcampId });
 
-  const courses = await Course
-    .find({ ...query })
-    .populate({
-      path: 'bootcamp',
-      select: 'name description'
-    });
+    return res.status(200)
+      .json({
+        success: true,
+        count: courses.length,
+        data: courses
+      });
+  }
 
   res.status(200)
-    .json({
-      success: true,
-      count: courses.length,
-      data: courses
-    });
+    .json(res.advancedResults);
 });
 
 
