@@ -31,7 +31,7 @@ const sendTokenResponse = (user, statusCode, res) => {
 /**
  * @desc Register user
  * @route POST /api/v1/auth/register
- * @access    Public
+ * @access Public
  */
 const register = asyncHandler(async (req, res) => {
   const data = pipe(
@@ -47,7 +47,7 @@ const register = asyncHandler(async (req, res) => {
 /**
  * @desc Login user
  * @route POST /api/v1/auth/login
- * @access    Public
+ * @access Public
  */
 const login = asyncHandler(async (req, res, next) => {
   const { email, password } = pipe(
@@ -82,7 +82,26 @@ const login = asyncHandler(async (req, res, next) => {
   return sendTokenResponse(user, 200, res);
 });
 
+/**
+ * @desc Get current logged in user
+ * @route GET /api/v1/auth/me
+ * @access Private
+ */
+const getMe = asyncHandler(async (req, res) => {
+  const userId = get('user._id', req);
+
+  const user = await User.findOne({ _id: userId });
+
+  return res
+    .status(200)
+    .json({
+      success: true,
+      data: user
+    });
+});
+
 module.exports = {
   register,
-  login
+  login,
+  getMe
 };
