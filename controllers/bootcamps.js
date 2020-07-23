@@ -164,13 +164,13 @@ const uploadBootcampPhoto = asyncHandler(async (req, res, next) => {
 
   if (file.size > process.env.MAX_FILE_UPLOAD) {
     return next(
-      new ErrorResponse(`Please upload an image less then ${process.env.MAX_FILE_UPLOA}`, 400)
+      new ErrorResponse(`Please upload an image less then ${process.env.MAX_FILE_UPLOAD}`, 400)
     );
   }
 
   file.name = `photo_${bootcampId}${path.parse(file.name).ext}`;
 
-  file.mv(`${process.env.FILE_UPLOAD_PATH}/${file.name}`, async err => {
+  file.mv(`${process.env.FILE_UPLOAD_PATH}/${file.name}`, async (err) => {
     if (err) {
       console.error(err);
       return next(new ErrorResponse(`Error while uploading file`, 500));

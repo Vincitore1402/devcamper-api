@@ -1,8 +1,32 @@
 const { pipe, get, pick } = require('lodash/fp');
+const moment = require('moment');
 
 const User = require('../models/User');
 
 const asyncHandler = require('../middleware/async');
+const ErrorResponse = require('../utils/errorResponse');
+
+const sendTokenResponse = (user, statusCode, res) => {
+  const token = user.getSignedJwtToken();
+
+  const options = {
+    expires: moment
+      .utc()
+      .add(process.env.JWT_COOKIE_EXPIRE, 'days')
+      .toDate(),
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production'
+  };
+
+  res
+    .status(statusCode)
+    .cookie('token', token, options)
+    .json({
+      success: true,
+      token
+    });
+};
+
 
 /**
  * @desc Register user
@@ -15,14 +39,50 @@ const register = asyncHandler(async (req, res) => {
     pick(['name', 'email', 'password', 'role'])
   )(req);
 
-  await User.create(data);
+  const user = await User.create(data);
 
-  return res.status(200)
-    .json({
-      success: true
-    });
+  return sendTokenResponse(user, 200, res);
+});
+
+/**
+ * @desc Login user
+ * @route POST /api/v1/auth/login
+ * @access    Public
+ */
+const login = asyncHandler(async (req, res, next) => {
+  const { email, password } = pipe(
+    get('body'),
+    pick(['email', 'password'])
+  )(req);
+
+  if (!email || !password) {
+    return next(
+      new ErrorResponse('Please provide an email and password', 400)
+    );
+  }
+
+  const user = await User
+    .findOne({ email })
+    .select('+password');
+
+  if (!user) {
+    return next(
+      new ErrorResponse('Invalid credentials', 401)
+    );
+  }
+
+  const isMatch = await user.matchPasswords(password);
+
+  if (!isMatch) {
+    return next(
+      new ErrorResponse('Invalid credentials', 401)
+    );
+  }
+
+  return sendTokenResponse(user, 200, res);
 });
 
 module.exports = {
-  register
+  register,
+  login
 };
