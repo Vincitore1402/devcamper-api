@@ -1,5 +1,6 @@
 const { get } = require('lodash/fp');
 const path = require('path');
+const { getUserId, getRole } = require('../utils/auth.utils');
 const ErrorResponse = require('../utils/errorResponse');
 const asyncHandler = require('../middleware/async');
 const geocoder = require('../utils/geocoder');
@@ -23,7 +24,7 @@ const getBootcamps = asyncHandler(async (req, res) => {
 const getBootCamp = asyncHandler(async (req, res, next) => {
   const bootcampId = get('params.id', req);
 
-  const bootcamp = await Bootcamp.findById(bootcampId);
+  const bootcamp = await Bootcamp.findOne({ _id: bootcampId });
 
   if (!bootcamp) {
     return next(
@@ -43,8 +44,22 @@ const getBootCamp = asyncHandler(async (req, res, next) => {
  * @route POST api/v1/bootcamps
  * @access Private
  */
-const createBootcamp = asyncHandler(async (req, res) => {
-  const bootcamp = await Bootcamp.create(req.body);
+const createBootcamp = asyncHandler(async (req, res, next) => {
+  const userId = getUserId(req);
+  const role = getRole(req);
+
+  const publishedBootcamp = await Bootcamp.findOne({ user: userId });
+
+  if (publishedBootcamp && role !== 'admin') {
+    return next(
+      new ErrorResponse(`User with id ${userId} has already published a bootcamp`, 400)
+    );
+  }
+
+  const bootcamp = await Bootcamp.create({
+    ...req.body,
+    user: userId
+  });
 
   res.status(201)
     .json({
@@ -59,13 +74,11 @@ const createBootcamp = asyncHandler(async (req, res) => {
  * @access Private
  */
 const updateBootcamp = asyncHandler(async (req, res, next) => {
+  const userId = getUserId(req);
+  const role = getRole(req);
   const bootcampId = get('params.id', req);
 
-  const bootcamp = await Bootcamp.findByIdAndUpdate(
-    bootcampId,
-    req.body,
-    { new: true, runValidators: true }
-  );
+  const bootcamp = await Bootcamp.findOne({ _id: bootcampId });
 
   if (!bootcamp) {
     return next(
@@ -73,10 +86,26 @@ const updateBootcamp = asyncHandler(async (req, res, next) => {
     );
   }
 
+  if (bootcamp.user.toString() !== userId && role !== 'admin') {
+    return next(
+      new ErrorResponse(
+        `User ${userId} is not authorized to update this bootcamp`,
+        401
+      )
+    );
+  }
+
+  const updatedBootcamp = await Bootcamp.findOneAndUpdate(
+    { _id: bootcampId },
+    req.body,
+    { new: true, runValidators: true }
+  );
+
+
   res.status(200)
     .json({
       success: true,
-      data: bootcamp
+      data: updatedBootcamp
     });
 });
 
@@ -86,13 +115,24 @@ const updateBootcamp = asyncHandler(async (req, res, next) => {
  * @access Private
  */
 const deleteBootcamp = asyncHandler(async (req, res, next) => {
+  const userId = getUserId(req);
+  const role = getRole(req);
   const bootcampId = get('params.id', req);
 
-  const bootcamp = await Bootcamp.findById(bootcampId);
+  const bootcamp = await Bootcamp.findOne({ _id: bootcampId });
 
   if (!bootcamp) {
     return next(
       new ErrorResponse(`Bootcamp not found with id of ${bootcampId}`, 404)
+    );
+  }
+
+  if (bootcamp.user.toString() !== userId && role !== 'admin') {
+    return next(
+      new ErrorResponse(
+        `User ${userId} is not authorized to delete this bootcamp`,
+        401
+      )
     );
   }
 
@@ -138,13 +178,24 @@ const getBootcampsInRadius = asyncHandler(async (req, res) => {
  * @access Private
  */
 const uploadBootcampPhoto = asyncHandler(async (req, res, next) => {
+  const userId = getUserId(req);
+  const role = getRole(req);
   const bootcampId = get('params.id', req);
 
-  const bootcamp = await Bootcamp.findById(bootcampId);
+  const bootcamp = await Bootcamp.findOne({ _id: bootcampId });
 
   if (!bootcamp) {
     return next(
       new ErrorResponse(`Bootcamp not found with id of ${bootcampId}`, 404)
+    );
+  }
+
+  if (bootcamp.user.toString() !== userId && role !== 'admin') {
+    return next(
+      new ErrorResponse(
+        `User ${userId} is not authorized to update this bootcamp`,
+        401
+      )
     );
   }
 

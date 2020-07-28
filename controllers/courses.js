@@ -2,6 +2,7 @@ const { get } = require('lodash/fp');
 
 const asyncHandler = require('../middleware/async');
 const ErrorResponse = require('../utils/errorResponse');
+const { getUserId, getRole } = require('../utils/auth.utils');
 
 const Course = require('../models/Course');
 const Bootcamp = require('../models/Bootcamp');
@@ -70,6 +71,8 @@ const getCourse = asyncHandler(async (req, res, next) => {
  */
 const createCourse = asyncHandler(async (req, res, next) => {
   const bootcampId = get('params.bootcampId', req);
+  const userId = getUserId(req);
+  const role = getRole(req);
 
   const bootcamp = await Bootcamp.findById(bootcampId);
 
@@ -82,9 +85,19 @@ const createCourse = asyncHandler(async (req, res, next) => {
     );
   }
 
+  if (bootcamp.user.toString() !== userId && role !== 'admin') {
+    return next(
+      new ErrorResponse(
+        `User ${userId} is not authorized to add a course to bootcamp ${bootcampId}`,
+        401
+      )
+    );
+  }
+
   const course = await Course.create({
     ...req.body,
-    bootcamp: bootcampId
+    bootcamp: bootcampId,
+    user: userId
   });
 
   res.status(200)
@@ -101,6 +114,8 @@ const createCourse = asyncHandler(async (req, res, next) => {
  */
 const updateCourse = asyncHandler(async (req, res, next) => {
   const courseId = get('params.id', req);
+  const userId = getUserId(req);
+  const role = getRole(req);
 
   const course = await Course.findById(courseId);
 
@@ -109,6 +124,15 @@ const updateCourse = asyncHandler(async (req, res, next) => {
       new ErrorResponse(
         `No course with the id of ${courseId}`,
         404
+      )
+    );
+  }
+
+  if (course.user.toString() !== userId && role !== 'admin') {
+    return next(
+      new ErrorResponse(
+        `User ${userId} is not authorized to update a course ${courseId}`,
+        401
       )
     );
   }
@@ -132,6 +156,8 @@ const updateCourse = asyncHandler(async (req, res, next) => {
  */
 const deleteCourse = asyncHandler(async (req, res, next) => {
   const courseId = get('params.id', req);
+  const userId = getUserId(req);
+  const role = getRole(req);
 
   const course = await Course.findById(courseId);
 
@@ -140,6 +166,15 @@ const deleteCourse = asyncHandler(async (req, res, next) => {
       new ErrorResponse(
         `No course with the id of ${courseId}`,
         404
+      )
+    );
+  }
+
+  if (course.user.toString() !== userId && role !== 'admin') {
+    return next(
+      new ErrorResponse(
+        `User ${userId} is not authorized to delete a course ${courseId}`,
+        401
       )
     );
   }
