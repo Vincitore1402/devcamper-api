@@ -109,12 +109,12 @@ const BootcampSchema = new mongoose.Schema(
   }
 );
 
-BootcampSchema.pre('save', function(next) {
+BootcampSchema.pre('save', function (next) {
   this.slug = slufigy(this.name, { lower: true });
   next();
 });
 
-BootcampSchema.pre('save', async function(next) {
+BootcampSchema.pre('save', async function (next) {
   const [data = {}] = await geocoder.geocode(this.address);
 
   this.location = {

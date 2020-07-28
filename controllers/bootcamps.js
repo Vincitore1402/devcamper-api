@@ -101,7 +101,6 @@ const updateBootcamp = asyncHandler(async (req, res, next) => {
     { new: true, runValidators: true }
   );
 
-
   res.status(200)
     .json({
       success: true,
@@ -224,7 +223,7 @@ const uploadBootcampPhoto = asyncHandler(async (req, res, next) => {
   file.mv(`${process.env.FILE_UPLOAD_PATH}/${file.name}`, async (err) => {
     if (err) {
       console.error(err);
-      return next(new ErrorResponse(`Error while uploading file`, 500));
+      return next(new ErrorResponse('Error while uploading file', 500));
     }
 
     await Bootcamp.findByIdAndUpdate(bootcampId, { photo: file.name });
@@ -234,7 +233,7 @@ const uploadBootcampPhoto = asyncHandler(async (req, res, next) => {
         success: true,
         data: file.name
       });
-  })
+  });
 });
 
 module.exports = {

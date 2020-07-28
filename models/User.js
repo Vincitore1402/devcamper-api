@@ -36,22 +36,22 @@ const UserSchema = new mongoose.Schema({
 });
 
 // Encrypt password using bcrypt
-UserSchema.pre('save', async function() {
+UserSchema.pre('save', async function () {
   const salt = await bcrypt.genSalt(10);
 
   this.password = await bcrypt.hash(this.password, salt);
 });
 
 // Sign JWT
-UserSchema.methods.getSignedJwtToken = function() {
+UserSchema.methods.getSignedJwtToken = function () {
   return jwt.sign(
     { id: this._id },
     process.env.JWT_SECRET,
     { expiresIn: process.env.JWT_EXPIRE }
-  )
+  );
 };
 
-UserSchema.methods.matchPasswords = async function(enteredPassword) {
+UserSchema.methods.matchPasswords = async function (enteredPassword) {
   return bcrypt.compare(enteredPassword, this.password);
 };
 

@@ -6,7 +6,8 @@
   "scripts": {
     "start": "NODE_ENV=production node server",
     "dev": "nodemon server",
-    "debug": "nodemon --inspect server"
+    "debug": "nodemon --inspect server",
+    "lint": "eslint ./ --config .eslintrc.json"
   },
   "author": "RL",
   "license": "MIT",
@@ -26,6 +27,10 @@
     "slugify": "^1.3.6"
   },
   "devDependencies": {
+    "eslint": "^7.5.0",
+    "eslint-config-airbnb-base": "^14.2.0",
+    "eslint-plugin-import": "^2.22.0",
+    "eslint-plugin-security": "^1.4.0",
     "nodemon": "^1.19.4"
   }
 }

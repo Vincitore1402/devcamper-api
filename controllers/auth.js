@@ -27,7 +27,6 @@ const sendTokenResponse = (user, statusCode, res) => {
     });
 };
 
-
 /**
  * @desc Register user
  * @route POST /api/v1/auth/register

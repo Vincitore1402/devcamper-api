@@ -32,7 +32,6 @@ const getCourses = asyncHandler(async (req, res) => {
     .json(res.advancedResults);
 });
 
-
 /**
  * @desc      Get single course
  * @route     GET /api/v1/courses/:id
