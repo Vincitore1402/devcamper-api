@@ -1,6 +1,10 @@
+/* eslint-disable no-underscore-dangle, no-useless-escape */
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const moment = require('moment');
+
+const { generateToken, hashToken } = require('../utils/common.utils');
 
 const UserSchema = new mongoose.Schema({
   name: {
@@ -36,14 +40,17 @@ const UserSchema = new mongoose.Schema({
 });
 
 // Encrypt password using bcrypt
-UserSchema.pre('save', async function () {
+UserSchema.pre('save', async function _handler(next) {
+  if (!this.isModified('password')) return next();
+
   const salt = await bcrypt.genSalt(10);
 
   this.password = await bcrypt.hash(this.password, salt);
+
+  return next();
 });
 
-// Sign JWT
-UserSchema.methods.getSignedJwtToken = function () {
+UserSchema.methods.getSignedJwtToken = function _handler() {
   return jwt.sign(
     { id: this._id },
     process.env.JWT_SECRET,
@@ -51,8 +58,21 @@ UserSchema.methods.getSignedJwtToken = function () {
   );
 };
 
-UserSchema.methods.matchPasswords = async function (enteredPassword) {
+UserSchema.methods.matchPasswords = async function _handler(enteredPassword) {
   return bcrypt.compare(enteredPassword, this.password);
+};
+
+UserSchema.methods.getResetPasswordToken = function _handler() {
+  const resetToken = generateToken();
+
+  this.resetPasswordToken = hashToken({ token: resetToken });
+
+  this.resetPasswordExpire = moment
+    .utc()
+    .add(10, 'minutes')
+    .toDate();
+
+  return resetToken;
 };
 
 module.exports = mongoose.model('User', UserSchema);
