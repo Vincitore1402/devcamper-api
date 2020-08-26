@@ -6,6 +6,7 @@ const User = require('../models/User');
 const asyncHandler = require('../middleware/async');
 const ErrorResponse = require('../utils/error-response');
 const { sendEmailMock } = require('../utils/email.utils');
+const { hashToken } = require('../utils/common.utils');
 
 const sendTokenResponse = (user, statusCode, res) => {
   const token = user.getSignedJwtToken();
@@ -154,9 +155,41 @@ const forgotPassword = asyncHandler(async (req, res, next) => {
   }
 });
 
+/**
+ * @desc      Reset password
+   @route     PUT /api/v1/auth/reset-password/:reset-token
+   @access    Public
+ */
+const resetPassword = asyncHandler(async (req, res, next) => {
+  const resetPasswordToken = pipe(
+    get('params.resetToken'),
+    token => hashToken({ token })
+  )(req);
+
+  const user = await User.findOne({
+    resetPasswordToken,
+    resetPasswordExpire: { $gt: Date.now() }
+  });
+
+  if (!user) {
+    return next(
+      new ErrorResponse('Invalid token', 400)
+    );
+  }
+
+  user.password = get('body.password', req);
+  user.resetPasswordToken = undefined;
+  user.resetPasswordExpire = undefined;
+
+  await user.save();
+
+  return sendTokenResponse(user, 200, res);
+});
+
 module.exports = {
   register,
   login,
   getMe,
-  forgotPassword
+  forgotPassword,
+  resetPassword
 };

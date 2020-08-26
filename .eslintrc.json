@@ -23,6 +23,13 @@
       140
     ],
     "object-shorthand": "off",
-    "object-curly-newline": "off"
+    "object-curly-newline": "off",
+    "arrow-parens": [
+      2,
+      "as-needed",
+      {
+        "requireForBlockBody": true
+      }
+    ]
   }
 }
