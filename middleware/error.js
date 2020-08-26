@@ -1,7 +1,7 @@
 const { pipe, map, values, get, pick } = require('lodash/fp');
 const ErrorResponse = require('../utils/error-response');
 
-const errorHandler = (err, req, res, next) => {
+const errorHandler = (err, req, res) => {
   let error = pick([
     'name', 'code', 'message', 'statusCode'
   ], err);

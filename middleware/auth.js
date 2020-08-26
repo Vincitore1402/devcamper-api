@@ -30,7 +30,7 @@ const protect = asyncHandler(async (req, res, next) => {
 
     req.user = await User.findOne({ _id: decoded.id });
 
-    next();
+    return next();
   } catch (err) {
     return next(
       new ErrorResponse('Not authorized to access this route', 401)
@@ -47,7 +47,7 @@ const authorize = (...roles) => asyncHandler(async (req, res, next) => {
     );
   }
 
-  next();
+  return next();
 });
 
 module.exports = {
