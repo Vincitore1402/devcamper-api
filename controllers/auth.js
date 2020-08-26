@@ -5,6 +5,7 @@ const User = require('../models/User');
 
 const asyncHandler = require('../middleware/async');
 const ErrorResponse = require('../utils/errorResponse');
+const { sendEmailMock } = require('../utils/email.utils');
 
 const sendTokenResponse = (user, statusCode, res) => {
   const token = user.getSignedJwtToken();
@@ -128,11 +129,11 @@ const forgotPassword = asyncHandler(async (req, res, next) => {
   console.log({ message });
 
   try {
-    /* await sendEmail({
+    await sendEmailMock({
       email: user.email,
       subject: 'Password reset token',
       message
-    }); */
+    });
 
     return res
       .status(200)
