@@ -1,7 +1,7 @@
 const { get } = require('lodash/fp');
 const path = require('path');
 const { getUserId, getRole } = require('../utils/auth.utils');
-const ErrorResponse = require('../utils/errorResponse');
+const ErrorResponse = require('../utils/error-response');
 const asyncHandler = require('../middleware/async');
 const geocoder = require('../utils/geocoder');
 const Bootcamp = require('../models/Bootcamp');

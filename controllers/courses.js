@@ -1,7 +1,7 @@
 const { get } = require('lodash/fp');
 
 const asyncHandler = require('../middleware/async');
-const ErrorResponse = require('../utils/errorResponse');
+const ErrorResponse = require('../utils/error-response');
 const { getUserId, getRole } = require('../utils/auth.utils');
 
 const Course = require('../models/Course');

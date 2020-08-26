@@ -4,7 +4,7 @@ const moment = require('moment');
 const User = require('../models/User');
 
 const asyncHandler = require('../middleware/async');
-const ErrorResponse = require('../utils/errorResponse');
+const ErrorResponse = require('../utils/error-response');
 const { sendEmailMock } = require('../utils/email.utils');
 
 const sendTokenResponse = (user, statusCode, res) => {

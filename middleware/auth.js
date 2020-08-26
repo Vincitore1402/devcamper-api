@@ -4,7 +4,7 @@ const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 
 const asyncHandler = require('./async');
-const ErrorResponse = require('../utils/errorResponse');
+const ErrorResponse = require('../utils/error-response');
 
 const getToken = pipe(
   split(' '),
