@@ -8,7 +8,7 @@ const advancedResultsMiddleware = (model, populate) => async (req, res, next) =>
   // Get request query and remove fields with specific purposes
   const reqQuery = pipe(
     get('query'),
-    (it) => ({ ...it }),
+    it => ({ ...it }),
     omitAll(removeFields)
   )(req);
 
@@ -25,13 +25,13 @@ const advancedResultsMiddleware = (model, populate) => async (req, res, next) =>
 
   const page = pipe(
     get('query.page'),
-    (it) => parseInt(it, 10),
+    it => parseInt(it, 10),
     defaultTo(1)
   )(req);
 
   const limit = pipe(
     get('query.limit'),
-    (it) => parseInt(it, 10),
+    it => parseInt(it, 10),
     defaultTo(25)
   )(req);
 

@@ -1,4 +1,4 @@
-/* eslint-disable no-underscore-dangle, no-useless-escape */
+/* eslint-disable no-underscore-dangle, no-useless-escape, security/detect-unsafe-regex */
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');

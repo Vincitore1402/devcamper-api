@@ -1,3 +1,4 @@
+/* eslint-disable no-underscore-dangle, no-useless-escape */
 const mongoose = require('mongoose');
 const slufigy = require('slugify');
 const geocoder = require('../utils/geocoder');
@@ -109,12 +110,12 @@ const BootcampSchema = new mongoose.Schema(
   }
 );
 
-BootcampSchema.pre('save', function (next) {
+BootcampSchema.pre('save', function _handler(next) {
   this.slug = slufigy(this.name, { lower: true });
   next();
 });
 
-BootcampSchema.pre('save', async function (next) {
+BootcampSchema.pre('save', async function _handler(next) {
   const [data = {}] = await geocoder.geocode(this.address);
 
   this.location = {
@@ -128,14 +129,13 @@ BootcampSchema.pre('save', async function (next) {
     country: data.countryCode,
   };
 
-  // Do not saving address
   this.address = undefined;
 
   next();
 });
 
 // Cascade delete courses when a bootcamp is deleted
-BootcampSchema.pre('remove', async function (next) {
+BootcampSchema.pre('remove', async function _handler(next) {
   await this.model('Course').deleteMany({ bootcamp: this._id });
   next();
 });

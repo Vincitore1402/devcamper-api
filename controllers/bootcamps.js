@@ -32,7 +32,8 @@ const getBootCamp = asyncHandler(async (req, res, next) => {
     );
   }
 
-  res.status(200)
+  return res
+    .status(200)
     .json({
       success: true,
       data: bootcamp
@@ -61,7 +62,8 @@ const createBootcamp = asyncHandler(async (req, res, next) => {
     user: userId
   });
 
-  res.status(201)
+  return res
+    .status(201)
     .json({
       success: true,
       data: bootcamp
@@ -101,7 +103,8 @@ const updateBootcamp = asyncHandler(async (req, res, next) => {
     { new: true, runValidators: true }
   );
 
-  res.status(200)
+  return res
+    .status(200)
     .json({
       success: true,
       data: updatedBootcamp
@@ -137,7 +140,8 @@ const deleteBootcamp = asyncHandler(async (req, res, next) => {
 
   await bootcamp.remove();
 
-  res.status(200)
+  return res
+    .status(200)
     .json({
       success: true,
       data: {}
@@ -163,7 +167,8 @@ const getBootcampsInRadius = asyncHandler(async (req, res) => {
     }
   });
 
-  res.status(200)
+  return res
+    .status(200)
     .json({
       success: true,
       count: bootcamps.length,
@@ -176,6 +181,7 @@ const getBootcampsInRadius = asyncHandler(async (req, res) => {
  * @route PUT api/v1/bootcamps/:id/photo
  * @access Private
  */
+/* eslint-disable consistent-return */
 const uploadBootcampPhoto = asyncHandler(async (req, res, next) => {
   const userId = getUserId(req);
   const role = getRole(req);
@@ -228,7 +234,8 @@ const uploadBootcampPhoto = asyncHandler(async (req, res, next) => {
 
     await Bootcamp.findByIdAndUpdate(bootcampId, { photo: file.name });
 
-    res.status(200)
+    res
+      .status(200)
       .json({
         success: true,
         data: file.name

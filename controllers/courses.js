@@ -20,7 +20,8 @@ const getCourses = asyncHandler(async (req, res) => {
     const courses = await Course
       .find({ bootcamp: bootcampId });
 
-    return res.status(200)
+    return res
+      .status(200)
       .json({
         success: true,
         count: courses.length,
@@ -28,7 +29,8 @@ const getCourses = asyncHandler(async (req, res) => {
       });
   }
 
-  res.status(200)
+  return res
+    .status(200)
     .json(res.advancedResults);
 });
 
@@ -56,7 +58,8 @@ const getCourse = asyncHandler(async (req, res, next) => {
     );
   }
 
-  res.status(200)
+  return res
+    .status(200)
     .json({
       success: true,
       data: course
@@ -99,7 +102,8 @@ const createCourse = asyncHandler(async (req, res, next) => {
     user: userId
   });
 
-  res.status(200)
+  return res
+    .status(200)
     .json({
       success: true,
       data: course
@@ -141,7 +145,8 @@ const updateCourse = asyncHandler(async (req, res, next) => {
     runValidators: true
   });
 
-  res.status(200)
+  return res
+    .status(200)
     .json({
       success: true,
       data: updatedCourse
@@ -180,7 +185,8 @@ const deleteCourse = asyncHandler(async (req, res, next) => {
 
   await course.remove();
 
-  res.status(200)
+  return res
+    .status(200)
     .json({
       success: true,
       data: {}
