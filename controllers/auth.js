@@ -7,6 +7,7 @@ const asyncHandler = require('../middleware/async');
 const ErrorResponse = require('../utils/error-response');
 const { sendEmailMock } = require('../utils/email.utils');
 const { hashToken } = require('../utils/common.utils');
+const { getUserId } = require('../utils/auth.utils');
 
 const sendTokenResponse = (user, statusCode, res) => {
   const token = user.getSignedJwtToken();
@@ -102,6 +103,61 @@ const getMe = asyncHandler(async (req, res) => {
 });
 
 /**
+ * @desc Update user details
+   @route PUT /api/v1/auth/update-details
+   @access Private
+ */
+const updateDetails = asyncHandler(async (req, res) => {
+  const fieldsToUpdate = pipe(
+    get('body'),
+    pick(['name', 'email'])
+  )(req);
+
+  const user = await User.findOneAndUpdate(
+    { _id: getUserId(req) },
+    fieldsToUpdate,
+    {
+      new: true,
+      runValidators: true
+    }
+  );
+
+  return res
+    .status(200)
+    .json({
+      success: true,
+      data: user
+    });
+});
+
+/**
+ * @desc Update password
+   @route PUT /api/v1/auth/updatepassword
+   @access Private
+ */
+const updatePassword = asyncHandler(async (req, res, next) => {
+  const user = await User
+    .findOne({ _id: getUserId(req) })
+    .select('+password');
+
+  const currentPassword = get('body.currentPassword', req);
+
+  const isPasswordsMatch = await user.matchPasswords(currentPassword);
+
+  if (!isPasswordsMatch) {
+    return next(
+      new ErrorResponse('Password is incorrect', 401)
+    );
+  }
+
+  user.password = get('body.newPassword', req);
+
+  await user.save();
+
+  return sendTokenResponse(user, 200, res);
+});
+
+/**
  * @desc Forgot password
  * @route POST /api/v1/auth/forgot-password
  * @access Public
@@ -191,5 +247,7 @@ module.exports = {
   login,
   getMe,
   forgotPassword,
-  resetPassword
+  resetPassword,
+  updateDetails,
+  updatePassword
 };

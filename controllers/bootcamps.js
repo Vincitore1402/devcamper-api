@@ -11,10 +11,9 @@ const Bootcamp = require('../models/Bootcamp');
  * @route GET api/v1/bootcamps
  * @access Public
  */
-const getBootcamps = asyncHandler(async (req, res) => {
-  res.status(200)
-    .json(res.advancedResults);
-});
+const getBootcamps = asyncHandler(async (req, res) => res
+  .status(200)
+  .json(res.advancedResults));
 
 /**
  * @desc Get single bootcamps
