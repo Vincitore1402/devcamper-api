@@ -85,6 +85,28 @@ const login = asyncHandler(async (req, res, next) => {
 });
 
 /**
+ * @desc Log user out / clear cookie
+   @route GET /api/v1/auth/logout
+   @access Public
+ */
+const logout = asyncHandler(async (req, res) => {
+  res.cookie('token', 'none', {
+    expires: moment
+      .utc()
+      .add(10, 'minutes')
+      .toDate(),
+    httpOnly: true,
+  });
+
+  return res
+    .status(200)
+    .json({
+      success: true,
+      data: {}
+    });
+});
+
+/**
  * @desc Get current logged in user
  * @route GET /api/v1/auth/me
  * @access Private
@@ -245,6 +267,7 @@ const resetPassword = asyncHandler(async (req, res, next) => {
 module.exports = {
   register,
   login,
+  logout,
   getMe,
   forgotPassword,
   resetPassword,
