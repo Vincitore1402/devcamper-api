@@ -10,6 +10,7 @@ const helmet = require('helmet');
 const xss = require('xss-clean');
 const hpp = require('hpp');
 const rateLimit = require('express-rate-limit');
+const cors = require('cors');
 const errorHandler = require('./middleware/error');
 const connectDB = require('./config/db');
 
@@ -47,6 +48,8 @@ const limiter = rateLimit({
 app.use(limiter);
 
 app.use(hpp({}));
+
+app.use(cors());
 
 app.use(
   express.static(
