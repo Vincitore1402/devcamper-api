@@ -5,7 +5,7 @@ const User = require('../models/User');
 
 const asyncHandler = require('../middleware/async');
 const ErrorResponse = require('../utils/error-response');
-const { sendEmailMock } = require('../utils/email.utils');
+const { sendEmail } = require('../utils/email.utils');
 const { hashToken } = require('../utils/common.utils');
 const { getUserId } = require('../utils/auth.utils');
 
@@ -205,10 +205,8 @@ const forgotPassword = asyncHandler(async (req, res, next) => {
   
   ${resetUrl}`;
 
-  console.log({ message });
-
   try {
-    await sendEmailMock({
+    await sendEmail({
       email: user.email,
       subject: 'Password reset token',
       message
@@ -234,9 +232,9 @@ const forgotPassword = asyncHandler(async (req, res, next) => {
 });
 
 /**
- * @desc      Reset password
-   @route     PUT /api/v1/auth/reset-password/:reset-token
-   @access    Public
+ * @desc Reset password
+   @route PUT /api/v1/auth/reset-password/:reset-token
+   @access Public
  */
 const resetPassword = asyncHandler(async (req, res, next) => {
   const resetPasswordToken = pipe(

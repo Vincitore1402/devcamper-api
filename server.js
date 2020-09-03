@@ -6,6 +6,10 @@ require('colors');
 const fileUpload = require('express-fileupload');
 const cookieParser = require('cookie-parser');
 const mongoSanitize = require('express-mongo-sanitize');
+const helmet = require('helmet');
+const xss = require('xss-clean');
+const hpp = require('hpp');
+const rateLimit = require('express-rate-limit');
 const errorHandler = require('./middleware/error');
 const connectDB = require('./config/db');
 
@@ -30,6 +34,19 @@ if (process.env.NODE_ENV === 'development') app.use(morgan('dev'));
 app.use(fileUpload({}));
 
 app.use(mongoSanitize());
+
+app.use(helmet());
+
+app.use(xss());
+
+const limiter = rateLimit({
+  windowMs: 10 * 60 * 1000,
+  max: 100
+});
+
+app.use(limiter);
+
+app.use(hpp({}));
 
 app.use(
   express.static(

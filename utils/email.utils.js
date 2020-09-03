@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 const nodemailer = require('nodemailer');
 
 const sendEmail = async (params = {}) => {
@@ -23,6 +24,5 @@ const sendEmail = async (params = {}) => {
 const sendEmailMock = async (params = {}) => Promise.resolve(params);
 
 module.exports = {
-  sendEmail,
-  sendEmailMock
+  sendEmail: sendEmailMock
 };
